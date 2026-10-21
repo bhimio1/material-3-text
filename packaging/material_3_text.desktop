@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=Text
+GenericName=Text Editor
+Comment=Edit code, configs and notes, in your desktop's colors
+Exec=m3-text %F
+Icon=accessories-text-editor
+Terminal=false
+Categories=Utility;TextEditor;Development;
+Keywords=text;editor;code;notes;markdown;config;
+MimeType=text/plain;text/markdown;text/x-markdown;text/x-log;text/x-readme;text/x-rust;text/x-python;text/x-python3;text/x-script.python;text/x-csrc;text/x-chdr;text/x-c++src;text/x-c++hdr;text/x-c;text/x-go;text/x-java;text/x-lua;text/x-qml;text/x-shellscript;application/x-shellscript;text/x-makefile;text/x-cmake;text/x-patch;text/x-diff;text/css;text/html;text/xml;application/xml;text/javascript;application/javascript;application/x-javascript;application/typescript;application/x-typescript;application/json;application/x-yaml;application/yaml;text/x-yaml;application/toml;text/x-toml;text/x-ini;application/x-desktop;text/x-systemd-unit;application/x-zerosize;
+StartupNotify=true
+StartupWMClass=material_3_text
+Actions=NewWindow;
+
+[Desktop Action NewWindow]
+Name=New Window
+Exec=m3-text

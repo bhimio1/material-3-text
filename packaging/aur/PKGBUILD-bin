@@ -1,0 +1,29 @@
+# Maintainer: bhimio1
+# Template: the release workflow fills in @PKGVER@ and @SHA256@ and publishes
+# this to the AUR as material-3-text-bin.
+pkgname=material-3-text-bin
+pkgver=@PKGVER@
+pkgrel=1
+pkgdesc="Light Material 3 code and text editor that follows end4-pC's colors"
+arch=('x86_64')
+url="https://github.com/bhimio1/material-3-text"
+license=('MIT')
+depends=('libxkbcommon' 'wayland' 'libglvnd' 'gcc-libs' 'glibc')
+optdepends=(
+  'polkit: save files you can only write as administrator (pkexec)'
+  'glib2: move files to the trash from the sidebar (gio)'
+  'xdg-desktop-portal: open and save dialogs'
+  'material-3-file-manager: "Show in Files" and the portal file chooser'
+)
+provides=('material-3-text')
+conflicts=('material-3-text' 'material-3-text-git')
+source=("$pkgname-$pkgver.tar.gz::$url/releases/download/v$pkgver/m3-text-x86_64-linux.tar.gz")
+sha256sums=('@SHA256@')
+
+package() {
+  cd "m3-text-x86_64-linux"
+  install -Dm755 m3-text "$pkgdir/usr/bin/m3-text"
+  install -Dm644 material_3_text.desktop "$pkgdir/usr/share/applications/material_3_text.desktop"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 LICENSE-Inter.txt "$pkgdir/usr/share/licenses/$pkgname/LICENSE-Inter.txt"
+}
