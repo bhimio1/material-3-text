@@ -1,0 +1,46 @@
+[package]
+name = "material-3-text"
+version = "0.1.0"
+edition = "2021"
+description = "A light Material 3 code and text editor that follows end4-pC's colors"
+license = "MIT"
+repository = "https://github.com/bhimio1/material-3-text"
+
+[[bin]]
+name = "m3-text"
+path = "src/main.rs"
+
+[dependencies]
+material-3-ui = { git = "https://github.com/bhimio1/material-3-ui", rev = "d1c430aa7feebf86d027f6dce1566b6b9ba4dce0" }
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+egui = "0.37"
+ropey = { version = "1.6", default-features = false, features = ["simd"] }
+syntect = { version = "5.3", default-features = false, features = ["default-onig"] }
+two-face = { version = "0.5", default-features = false, features = ["syntect-onig"] }
+ignore = "0.4"
+notify = "6"
+encoding_rs = "0.8"
+chardetng = "1"
+regex = "1"
+fuzzy-matcher = "0.3"
+pulldown-cmark = { version = "0.13", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+dirs = "6"
+flume = "0.11"
+rfd = "0.15"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
+strip = true
+
+[profile.dev]
+debug = 0
+
+[profile.dev.package."*"]
+opt-level = 2
