@@ -95,7 +95,7 @@ fn quick_open(app: &mut App, ctx: &egui::Context) {
     let ((), outside) = palette_panel(ctx, &p, "quick-open", 640.0, |ui| {
         let w = ui.available_width();
         let fid = egui::Id::unique("quick-field");
-        let resp = ui_ext::field(ui, &mut q.query, "Go to file (type :N for a line)", w, fid);
+        let resp = widgets::field(ui, &mut q.query, "Go to file (type :N for a line)", w, fid);
         resp.request_focus();
         ui.add_space(6.0);
         if indexing && cands.is_empty() {
@@ -117,7 +117,7 @@ fn quick_open(app: &mut App, ctx: &egui::Context) {
                 }
                 let name_start = c.shown.rfind('/').map_or(0, |i| i + 1);
                 let name = &c.shown[name_start..];
-                widgets::paint_icon(ui, ui_ext::file_icon(name, false, false), pos2(rect.left() + 20.0, rect.center().y), 20.0, p.on_surface_variant);
+                widgets::paint_icon(ui, widgets::file_icon(name, false, false), pos2(rect.left() + 20.0, rect.center().y), 20.0, p.on_surface_variant);
                 let mut job = egui::text::LayoutJob::default();
                 let name_chars = c.shown[..name_start].chars().count();
                 for (ci, ch) in name.chars().enumerate() {
@@ -168,7 +168,7 @@ fn goto_line(app: &mut App, ctx: &egui::Context) {
     let (enter, esc) = ctx.input(|i| (i.key_pressed(Key::Enter), i.key_pressed(Key::Escape)));
     let ((), outside) = palette_panel(ctx, &p, "goto", 360.0, |ui| {
         let w = ui.available_width();
-        let resp = ui_ext::field(ui, text, &format!("Line[:column], 1–{lines}"), w, egui::Id::unique("goto-field"));
+        let resp = widgets::field(ui, text, &format!("Line[:column], 1–{lines}"), w, egui::Id::unique("goto-field"));
         resp.request_focus();
     });
     if enter {
@@ -247,7 +247,7 @@ fn dialog(app: &mut App, ctx: &egui::Context) {
             let mut confirm = false;
             common::modal(ctx, &p, "save-as", ICON_SAVE_AS, &format!("Save {}", title_of(app, id)), |ui| {
                 ui.set_width(460.0);
-                let resp = ui_ext::field(ui, &mut path, "Path", 460.0, egui::Id::unique("save-as-path"));
+                let resp = widgets::field(ui, &mut path, "Path", 460.0, egui::Id::unique("save-as-path"));
                 if !resp.has_focus() && !overwrite {
                     resp.request_focus();
                 }
@@ -376,7 +376,7 @@ fn dialog(app: &mut App, ctx: &egui::Context) {
             common::modal(ctx, &p, "new-entry", if folder { ICON_CREATE_NEW_FOLDER } else { ICON_NOTE_ADD }, title, |ui| {
                 ui.set_width(380.0);
                 ui.label(ui_ext::dim(format!("In {}", material_3_ui::sys::paths::tilde(&dir)), 12.5, &p));
-                let resp = ui_ext::field(ui, &mut name, "Name", 380.0, egui::Id::unique("new-entry-name"));
+                let resp = widgets::field(ui, &mut name, "Name", 380.0, egui::Id::unique("new-entry-name"));
                 resp.request_focus();
                 // (Checked directly: the field keeps its focus here, so it never
                 // reports losing it to Enter.)
@@ -416,7 +416,7 @@ fn dialog(app: &mut App, ctx: &egui::Context) {
             let mut confirm = false;
             common::modal(ctx, &p, "rename", ICON_DRIVE_FILE_RENAME_OUTLINE, "Rename", |ui| {
                 ui.set_width(380.0);
-                let resp = ui_ext::field(ui, &mut name, "New name", 380.0, egui::Id::unique("rename-name"));
+                let resp = widgets::field(ui, &mut name, "New name", 380.0, egui::Id::unique("rename-name"));
                 resp.request_focus();
                 // (Checked directly: the field keeps its focus here, so it never
                 // reports losing it to Enter.)

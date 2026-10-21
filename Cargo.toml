@@ -11,7 +11,7 @@ name = "m3-text"
 path = "src/main.rs"
 
 [dependencies]
-material-3-ui = { git = "https://github.com/bhimio1/material-3-ui", rev = "d1c430aa7feebf86d027f6dce1566b6b9ba4dce0" }
+material-3-ui = { git = "https://github.com/bhimio1/material-3-ui", rev = "5555579277ac2da1e0f1c15c2f2342d9bfd002b9", features = ["markdown"] }
 eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
 egui = "0.37"
 ropey = { version = "1.6", default-features = false, features = ["simd"] }
@@ -23,7 +23,6 @@ encoding_rs = "0.8"
 chardetng = "1"
 regex = "1"
 fuzzy-matcher = "0.3"
-pulldown-cmark = { version = "0.13", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "0.9"

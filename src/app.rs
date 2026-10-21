@@ -9,7 +9,7 @@ use crate::files::{self, LoadError, Stamp};
 use crate::search::{FolderSearch, Query, WalkOptions};
 use crate::swap::{self, SwapEntry};
 use crate::tree::{self, Tree};
-use crate::ui_ext::take_key;
+use material_3_ui::keys::take_key;
 use egui::{Key, Modifiers};
 use material_3_ui::sys::task::Task;
 use material_3_ui::theme::ThemeManager;
@@ -527,7 +527,8 @@ impl App {
                 match doc.encode(&settings) {
                     Ok(bytes) => {
                         self.root_save.spawn(ctx, move || {
-                            let r = files::save_as_root(&path, &bytes).map_err(|e| e.to_string());
+                            let r = material_3_ui::fs::pkexec_write(&path, &bytes, false)
+                                .and_then(|()| files::stamp(&files::resolve(&path)).ok_or_else(|| "couldn't read the file back".to_string()));
                             (id, path, r)
                         });
                     }

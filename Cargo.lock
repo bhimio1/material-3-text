@@ -1830,7 +1830,6 @@ dependencies = [
  "ignore",
  "material-3-ui",
  "notify",
- "pulldown-cmark",
  "regex",
  "rfd",
  "ropey",
@@ -1844,8 +1843,8 @@ dependencies = [
 
 [[package]]
 name = "material-3-ui"
-version = "0.1.0"
-source = "git+https://github.com/bhimio1/material-3-ui?rev=d1c430aa7feebf86d027f6dce1566b6b9ba4dce0#d1c430aa7feebf86d027f6dce1566b6b9ba4dce0"
+version = "0.2.0"
+source = "git+https://github.com/bhimio1/material-3-ui?rev=5555579277ac2da1e0f1c15c2f2342d9bfd002b9#5555579277ac2da1e0f1c15c2f2342d9bfd002b9"
 dependencies = [
  "anyhow",
  "dirs",
@@ -1854,6 +1853,7 @@ dependencies = [
  "flume",
  "material-colors",
  "notify",
+ "pulldown-cmark",
  "serde",
  "serde_json",
 ]

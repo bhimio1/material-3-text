@@ -1,7 +1,6 @@
 //! The find / replace bar above the editor.
 
 use crate::app::{select_match, App};
-use crate::ui_ext;
 use egui::{vec2, CornerRadius, Frame, Key, Margin, Ui};
 use material_3_ui::icons::icons::*;
 use material_3_ui::widgets::{self, ButtonKind};
@@ -29,7 +28,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                     app.find.replace_open = !app.find.replace_open;
                 }
                 let w = (ui.available_width() - 330.0).clamp(160.0, 420.0);
-                let resp = ui_ext::field(ui, &mut app.find.query.text, "Find", w, field_id);
+                let resp = widgets::field(ui, &mut app.find.query.text, "Find", w, field_id);
                 if std::mem::take(&mut app.find.focus) {
                     resp.request_focus();
                     if let Some(mut state) = egui::TextEdit::load_state(ui.ctx(), field_id) {
@@ -90,7 +89,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                 ui.horizontal(|ui| {
                     ui.add_space(34.0);
                     let w = (ui.available_width() - 330.0).clamp(160.0, 420.0);
-                    let resp = ui_ext::field(ui, &mut app.find.replace, if app.find.query.regex { "Replace ($1 for groups)" } else { "Replace" }, w, replace_id);
+                    let resp = widgets::field(ui, &mut app.find.replace, if app.find.query.regex { "Replace ($1 for groups)" } else { "Replace" }, w, replace_id);
                     if resp.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
                         replace_one = true;
                         resp.request_focus();

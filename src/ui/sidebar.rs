@@ -2,7 +2,7 @@
 
 use crate::app::{Action, App, Dialog, SideMode};
 use crate::cli::OpenRequest;
-use crate::ui_ext::{self, menu_item};
+use crate::ui_ext;
 use egui::{pos2, vec2, Align2, CornerRadius, FontId, Key, Sense, Ui};
 use material_3_ui::icons::icons::*;
 use material_3_ui::widgets::{self, ButtonKind};
@@ -46,7 +46,7 @@ fn no_folder(app: &mut App, ui: &mut Ui) {
         let active = app.active;
         let rows: Vec<(usize, String, bool)> = app.docs.iter().enumerate().map(|(i, d)| (i, d.title(), d.is_dirty())).collect();
         for (i, title, dirty) in rows {
-            let resp = tree_row(ui, 0, ui_ext::file_icon(&title, false, false), &title, i == active, dirty, None);
+            let resp = tree_row(ui, 0, widgets::file_icon(&title, false, false), &title, i == active, dirty, None);
             if resp.clicked() {
                 app.actions.push(Action::Activate(i));
             }
@@ -99,11 +99,11 @@ fn files(app: &mut App, ui: &mut Ui) {
             egui::Popup::menu(&more).width(240.0).show(|ui| {
                 let e = &mut app.config.editor;
                 let mut changed = false;
-                if menu_item(ui, Some(ICON_VISIBILITY), "Show hidden files", "", e.show_hidden_files) {
+                if widgets::menu_item(ui, Some(ICON_VISIBILITY), "Show hidden files", "", e.show_hidden_files) {
                     e.show_hidden_files = !e.show_hidden_files;
                     changed = true;
                 }
-                if menu_item(ui, Some(ICON_VISIBILITY), "Show ignored files", "", e.show_ignored_files) {
+                if widgets::menu_item(ui, Some(ICON_VISIBILITY), "Show ignored files", "", e.show_ignored_files) {
                     e.show_ignored_files = !e.show_ignored_files;
                     changed = true;
                 }
@@ -112,13 +112,13 @@ fn files(app: &mut App, ui: &mut Ui) {
                     app.save_config();
                 }
                 ui.separator();
-                if menu_item(ui, Some(ICON_FOLDER), "Show in Files", "", false) {
+                if widgets::menu_item(ui, Some(ICON_FOLDER), "Show in Files", "", false) {
                     app.actions.push(Action::ShowInFiles(root.clone()));
                 }
-                if menu_item(ui, Some(ICON_FOLDER_OPEN), "Open another folder…", "Ctrl+Shift+O", false) {
+                if widgets::menu_item(ui, Some(ICON_FOLDER_OPEN), "Open another folder…", "Ctrl+Shift+O", false) {
                     app.actions.push(Action::OpenFolderDialog);
                 }
-                if menu_item(ui, Some(ICON_CLOSE), "Close folder", "", false) {
+                if widgets::menu_item(ui, Some(ICON_CLOSE), "Close folder", "", false) {
                     app.actions.push(Action::CloseFolder);
                 }
             });
@@ -157,7 +157,7 @@ fn files(app: &mut App, ui: &mut Ui) {
         }
         for (depth, path, name, is_dir, expanded) in &rows[range] {
             let is_sel = selected.as_ref() == Some(path) || (!is_dir && active_path.as_ref() == Some(path));
-            let icon = ui_ext::file_icon(name, *is_dir, *expanded);
+            let icon = widgets::file_icon(name, *is_dir, *expanded);
             let resp = tree_row(ui, *depth, icon, name, is_sel, dirty.contains(path), is_dir.then_some(*expanded));
             if resp.clicked() {
                 if *is_dir {
@@ -176,10 +176,10 @@ fn files(app: &mut App, ui: &mut Ui) {
     });
     if let Some(r) = space_resp {
         r.context_menu(|ui| {
-            if menu_item(ui, Some(ICON_NOTE_ADD), "New file", "", false) {
+            if widgets::menu_item(ui, Some(ICON_NOTE_ADD), "New file", "", false) {
                 menu_actions.push(Action::NewEntry { dir: root.clone(), folder: false });
             }
-            if menu_item(ui, Some(ICON_CREATE_NEW_FOLDER), "New folder", "", false) {
+            if widgets::menu_item(ui, Some(ICON_CREATE_NEW_FOLDER), "New folder", "", false) {
                 menu_actions.push(Action::NewEntry { dir: root.clone(), folder: true });
             }
         });
@@ -197,24 +197,24 @@ fn files(app: &mut App, ui: &mut Ui) {
 
 fn entry_menu(ui: &mut Ui, path: &Path, is_dir: bool, out: &mut Vec<Action>) {
     let dir = if is_dir { path.to_path_buf() } else { path.parent().map(Path::to_path_buf).unwrap_or_default() };
-    if menu_item(ui, Some(ICON_NOTE_ADD), "New file", "", false) {
+    if widgets::menu_item(ui, Some(ICON_NOTE_ADD), "New file", "", false) {
         out.push(Action::NewEntry { dir: dir.clone(), folder: false });
     }
-    if menu_item(ui, Some(ICON_CREATE_NEW_FOLDER), "New folder", "", false) {
+    if widgets::menu_item(ui, Some(ICON_CREATE_NEW_FOLDER), "New folder", "", false) {
         out.push(Action::NewEntry { dir, folder: true });
     }
     ui.separator();
-    if menu_item(ui, Some(ICON_DRIVE_FILE_RENAME_OUTLINE), "Rename", "", false) {
+    if widgets::menu_item(ui, Some(ICON_DRIVE_FILE_RENAME_OUTLINE), "Rename", "", false) {
         out.push(Action::Rename(path.to_path_buf()));
     }
-    if menu_item(ui, Some(ICON_DELETE), "Move to trash", "", false) {
+    if widgets::menu_item(ui, Some(ICON_DELETE), "Move to trash", "", false) {
         out.push(Action::Delete(path.to_path_buf()));
     }
     ui.separator();
-    if menu_item(ui, Some(ICON_CONTENT_COPY), "Copy path", "", false) {
+    if widgets::menu_item(ui, Some(ICON_CONTENT_COPY), "Copy path", "", false) {
         out.push(Action::CopyPath(path.to_path_buf()));
     }
-    if menu_item(ui, Some(ICON_FOLDER), "Show in Files", "", false) {
+    if widgets::menu_item(ui, Some(ICON_FOLDER), "Show in Files", "", false) {
         out.push(Action::ShowInFiles(path.to_path_buf()));
     }
 }
@@ -223,7 +223,7 @@ fn search(app: &mut App, ui: &mut Ui) {
     let p = app.theme.palette().clone();
     let w = ui.available_width();
     let fid = egui::Id::unique("folder-search-field");
-    let resp = ui_ext::field(ui, &mut app.folder.query.text, "Search in folder", w, fid);
+    let resp = widgets::field(ui, &mut app.folder.query.text, "Search in folder", w, fid);
     if std::mem::take(&mut app.folder.focus) {
         resp.request_focus();
     }
@@ -250,7 +250,7 @@ fn search(app: &mut App, ui: &mut Ui) {
         });
     });
     if app.folder.show_replace {
-        ui_ext::field(ui, &mut app.folder.replace, "Replace with", w, egui::Id::unique("folder-replace-field"));
+        widgets::field(ui, &mut app.folder.replace, "Replace with", w, egui::Id::unique("folder-replace-field"));
         let can = app.folder.run.as_ref().is_some_and(|r| r.done && r.total > 0);
         ui.add_space(4.0);
         if widgets::button_enabled(ui, ButtonKind::Tonal, Some(ICON_FIND_REPLACE), "Replace all", can).clicked() {
@@ -292,7 +292,7 @@ fn search(app: &mut App, ui: &mut Ui) {
             let rel = file.path.strip_prefix(&root).unwrap_or(&file.path);
             let name = rel.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
             let collapsed = app.folder.collapsed.contains(&file.path);
-            let resp = tree_row(ui, 0, ui_ext::file_icon(&name, false, false), &name, false, false, Some(!collapsed));
+            let resp = tree_row(ui, 0, widgets::file_icon(&name, false, false), &name, false, false, Some(!collapsed));
             let dir = rel.parent().map(|d| d.display().to_string()).unwrap_or_default();
             let count = file.hits.len().to_string();
             ui.painter().text(pos2(resp.rect.right() - 10.0, resp.rect.center().y), Align2::RIGHT_CENTER, count, FontId::proportional(11.5), p.on_surface_variant);

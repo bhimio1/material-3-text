@@ -129,15 +129,14 @@ src/
   syntax.rs     syntect highlighting: palette-independent tokens, background parsing
   document.rs   an open file: encoding, line endings, find cache, reload
   encoding.rs   encoding and line-ending detection and conversion
-  files.rs      loading and saving (atomic, through symlinks, pkexec)
+  files.rs      loading with encoding detection (saving is material-3-ui's fs)
   swap.rs       crash-recovery swap files
   search.rs     find/replace and the background folder search
   tree.rs       the sidebar file tree, quick-open index and fuzzy matching
-  markdown.rs   the Markdown preview
   config.rs     preferences and recent files
   cli.rs        command-line parsing
   ui/           tabs, sidebar, find bar, status bar, dialogs
-  ui_ext.rs     small UI helpers (candidates for material-3-ui)
+  ui_ext.rs     a dim-label helper
 ```
 
 Run the tests with `cargo test`.

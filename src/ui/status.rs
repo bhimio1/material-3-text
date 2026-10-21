@@ -4,7 +4,7 @@
 use crate::app::{Action, App};
 use crate::buffer::Indent;
 use crate::encoding::{self, LineEnding};
-use crate::ui_ext::{self, chip, menu_item};
+use crate::ui_ext;
 use egui::{Layout, Ui};
 use material_3_ui::icons::icons::*;
 use material_3_ui::widgets;
@@ -33,7 +33,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
     let highlighting = doc.highlight.frontier() + crate::syntax::CHUNK < doc.view.visible.1 && lang != "Plain Text";
 
     ui.horizontal_centered(|ui| {
-        if chip(ui, &pos, "Go to line (Ctrl+G)").clicked() {
+        if widgets::chip(ui, &pos, "Go to line (Ctrl+G)").clicked() {
             app.goto = Some(String::new());
         }
         if readonly {
@@ -44,10 +44,10 @@ pub fn show(app: &mut App, ui: &mut Ui) {
         }
         ui.with_layout(Layout::right_to_left(egui::Align::Center), |ui| {
             // Language.
-            let resp = chip(ui, &lang, "Language");
+            let resp = widgets::chip(ui, &lang, "Language");
             egui::Popup::menu(&resp).width(260.0).show(|ui| {
                 let fid = egui::Id::unique("lang-filter");
-                let f = ui_ext::field(ui, &mut app.lang_filter, "Filter languages", 240.0, fid);
+                let f = widgets::field(ui, &mut app.lang_filter, "Filter languages", 240.0, fid);
                 if !f.has_focus() && app.lang_filter.is_empty() {
                     f.request_focus();
                 }
@@ -57,7 +57,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                         if !filter.is_empty() && !name.to_lowercase().contains(&filter) {
                             continue;
                         }
-                        if menu_item(ui, None, name, "", name == lang) {
+                        if widgets::menu_item(ui, None, name, "", name == lang) {
                             app.actions.push(Action::SetLanguage(id, name.to_string()));
                             app.lang_filter.clear();
                         }
@@ -65,7 +65,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                 });
             });
             // Line endings.
-            let resp = chip(ui, le.label(), "Line endings");
+            let resp = widgets::chip(ui, le.label(), "Line endings");
             egui::Popup::menu(&resp).width(200.0).show(|ui| {
                 for l in LineEnding::ALL {
                     let name = match l {
@@ -73,18 +73,18 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                         LineEnding::CrLf => "CRLF (Windows)",
                         LineEnding::Cr => "CR (classic Mac)",
                     };
-                    if menu_item(ui, None, name, "", l == le) {
+                    if widgets::menu_item(ui, None, name, "", l == le) {
                         app.actions.push(Action::SetLineEnding(id, l));
                     }
                 }
             });
             // Encoding.
-            let resp = chip(ui, &enc.label(), "Encoding");
+            let resp = widgets::chip(ui, &enc.label(), "Encoding");
             egui::Popup::menu(&resp).width(300.0).show(|ui| {
                 ui.label(ui_ext::dim("Save with encoding", 12.0, &p));
                 egui::ScrollArea::vertical().id_salt("enc-save").max_height(220.0).show(ui, |ui| {
                     for (e, name) in encoding::choices() {
-                        if menu_item(ui, None, name, "", e == enc) {
+                        if widgets::menu_item(ui, None, name, "", e == enc) {
                             app.actions.push(Action::SetEncoding(id, e));
                         }
                     }
@@ -98,7 +98,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                             continue;
                         }
                         seen.push(e.encoding);
-                        if menu_item(ui, Some(ICON_REFRESH), name.trim_end_matches(" with BOM"), "", false) {
+                        if widgets::menu_item(ui, Some(ICON_REFRESH), name.trim_end_matches(" with BOM"), "", false) {
                             app.actions.push(Action::Reinterpret(id, e.encoding));
                         }
                     }
@@ -106,22 +106,22 @@ pub fn show(app: &mut App, ui: &mut Ui) {
             });
             // Indentation.
             let label = if indent.tabs { format!("Tabs: {}", indent.width) } else { format!("Spaces: {}", indent.width) };
-            let resp = chip(ui, &label, "Indentation");
+            let resp = widgets::chip(ui, &label, "Indentation");
             egui::Popup::menu(&resp).width(240.0).show(|ui| {
                 for (tabs, width) in [(false, 2), (false, 4), (false, 8), (true, 4), (true, 8)] {
                     let i = Indent { tabs, width };
                     let name = if tabs { format!("Tabs (width {width})") } else { format!("Spaces: {width}") };
-                    if menu_item(ui, None, &name, "", i == indent) {
+                    if widgets::menu_item(ui, None, &name, "", i == indent) {
                         app.actions.push(Action::SetIndent(id, i));
                     }
                 }
                 ui.separator();
                 let to_tabs = Indent { tabs: true, width: indent.width };
                 let to_spaces = Indent { tabs: false, width: indent.width };
-                if menu_item(ui, Some(ICON_FORMAT_INDENT_INCREASE), "Convert indentation to tabs", "", false) {
+                if widgets::menu_item(ui, Some(ICON_FORMAT_INDENT_INCREASE), "Convert indentation to tabs", "", false) {
                     app.actions.push(Action::ConvertIndent(id, to_tabs));
                 }
-                if menu_item(ui, Some(ICON_FORMAT_INDENT_INCREASE), "Convert indentation to spaces", "", false) {
+                if widgets::menu_item(ui, Some(ICON_FORMAT_INDENT_INCREASE), "Convert indentation to spaces", "", false) {
                     app.actions.push(Action::ConvertIndent(id, to_spaces));
                 }
             });
