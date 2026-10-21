@@ -9,7 +9,6 @@ mod editor;
 mod encoding;
 mod files;
 mod layout;
-mod markdown;
 mod search;
 mod swap;
 mod syntax;

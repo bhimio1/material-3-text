@@ -14,9 +14,7 @@
 //! checkpoint.
 
 use crate::buffer::{Changed, CommentStyle};
-use egui::Color32;
-use material_3_ui::theme::palette::blend;
-use material_3_ui::theme::M3Palette;
+use material_3_ui::code::TOKEN_SCOPES;
 use ropey::Rope;
 use std::collections::HashMap;
 use std::path::Path;
@@ -35,93 +33,7 @@ const MAX_LINE: usize = 8_000;
 /// Lines parsed above a not-yet-reached line to guess its colors.
 const APPROX_LEAD: usize = 40;
 
-/// What a piece of code is, for coloring.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-#[repr(u8)]
-pub enum Tok {
-    Plain = 0,
-    Comment,
-    String,
-    Number,
-    Keyword,
-    Function,
-    Type,
-    Variable,
-    Tag,
-    Attribute,
-    Heading,
-    Inserted,
-    Deleted,
-    Operator,
-    Escape,
-    Link,
-    Emphasis,
-    Macro,
-}
-
-const TOKS: [Tok; 18] = [
-    Tok::Plain,
-    Tok::Comment,
-    Tok::String,
-    Tok::Number,
-    Tok::Keyword,
-    Tok::Function,
-    Tok::Type,
-    Tok::Variable,
-    Tok::Tag,
-    Tok::Attribute,
-    Tok::Heading,
-    Tok::Inserted,
-    Tok::Deleted,
-    Tok::Operator,
-    Tok::Escape,
-    Tok::Link,
-    Tok::Emphasis,
-    Tok::Macro,
-];
-
-impl Tok {
-    /// The Material color for this kind of token.
-    pub fn color(self, p: &M3Palette) -> Color32 {
-        let dark = p.is_dark();
-        let lift = |c: Color32| blend(c, if dark { Color32::WHITE } else { Color32::BLACK }, 0.12);
-        match self {
-            Tok::Plain | Tok::Emphasis => p.on_surface,
-            Tok::Comment => p.outline,
-            Tok::String => lift(p.tertiary),
-            Tok::Number => blend(p.error, p.on_surface, 0.35),
-            Tok::Keyword => p.primary,
-            Tok::Function => blend(p.primary, p.tertiary, 0.5),
-            Tok::Type => p.secondary,
-            Tok::Variable => blend(p.on_surface, p.tertiary, 0.45),
-            Tok::Tag => p.primary,
-            Tok::Attribute => p.secondary,
-            Tok::Heading => p.primary,
-            Tok::Inserted => blend(Color32::from_rgb(0x4C, 0xAF, 0x50), p.on_surface, 0.2),
-            Tok::Deleted => p.error,
-            Tok::Operator => p.on_surface_variant,
-            Tok::Escape => blend(p.error, p.primary, 0.5),
-            Tok::Link => p.primary,
-            Tok::Macro => blend(p.tertiary, p.primary, 0.4),
-        }
-    }
-
-    pub fn italic(self) -> bool {
-        matches!(self, Tok::Comment | Tok::Emphasis)
-    }
-
-    pub fn underline(self) -> bool {
-        self == Tok::Link
-    }
-}
-
-/// A colored run within a line, in chars.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Span {
-    pub start: usize,
-    pub end: usize,
-    pub tok: Tok,
-}
+pub use material_3_ui::code::{Span, Tok};
 
 pub fn syntaxes() -> &'static SyntaxSet {
     static SET: OnceLock<SyntaxSet> = OnceLock::new();
@@ -141,32 +53,9 @@ fn token_theme() -> &'static Theme {
             name: Some("m3-tokens".into()),
             author: None,
             settings: ThemeSettings { foreground: Some(Color { r: 0, g: 0, b: 0, a: 255 }), ..Default::default() },
-            scopes: vec![
-                item("keyword.operator, punctuation.accessor, punctuation.separator.key-value", Tok::Operator),
-                item("comment, punctuation.definition.comment", Tok::Comment),
-                item("string, string.quoted, markup.raw, markup.inline.raw", Tok::String),
-                item("constant.numeric, constant.language, constant.character, constant.other, support.constant, variable.other.constant", Tok::Number),
-                item("constant.character.escape, string.regexp, constant.other.placeholder", Tok::Escape),
-                item("keyword, storage, storage.type, storage.modifier, keyword.control, variable.language.this, variable.language.self", Tok::Keyword),
-                item("keyword.operator.word, keyword.operator.logical.python, keyword.operator.new", Tok::Keyword),
-                item("entity.name.function, support.function, variable.function, meta.function-call.identifier", Tok::Function),
-                item("entity.name.type, entity.name.class, entity.name.struct, entity.name.enum, entity.name.trait, entity.name.union, entity.name.interface, entity.name.namespace, support.type, support.class, entity.other.inherited-class, storage.type.primitive, storage.type.numeric", Tok::Type),
-                item("variable.parameter, variable.other.member, variable.other.property, meta.property.object", Tok::Variable),
-                item("entity.name.tag, punctuation.definition.tag", Tok::Tag),
-                item("entity.other.attribute-name, support.type.property-name, meta.mapping.key, entity.name.tag.yaml, keyword.other.definition.ini, entity.name.section.group-title.ini, meta.tag.key.toml, entity.other.attribute-name.class.css, entity.other.attribute-name.id.css", Tok::Attribute),
-                item("markup.heading, entity.name.section, punctuation.definition.heading, meta.tag.table.toml, entity.name.section.toml, meta.section.toml", Tok::Heading),
-                item("markup.inserted, meta.diff.header.to-file", Tok::Inserted),
-                item("markup.deleted, meta.diff.header.from-file", Tok::Deleted),
-                item("markup.underline.link, markup.link, string.other.link, meta.link", Tok::Link),
-                item("markup.bold, markup.italic", Tok::Emphasis),
-                item("meta.preprocessor, keyword.control.import, support.function.macro, entity.name.function.macro, meta.annotation, meta.attribute.rust, punctuation.definition.annotation", Tok::Macro),
-            ],
+            scopes: TOKEN_SCOPES.iter().map(|(scope, tok)| item(scope, *tok)).collect(),
         }
     })
-}
-
-fn tok_of(c: Color) -> Tok {
-    TOKS.get(c.r as usize).copied().unwrap_or(Tok::Plain)
 }
 
 // -------------------------------------------------------------- languages
@@ -524,7 +413,7 @@ fn spans_from(text: &str, ops: &[(usize, syntect::parsing::ScopeStackOp)], stack
     let mut chars = 0usize;
     for (style, piece, _) in RangedHighlightIterator::new(&mut hs, ops, text, hl) {
         let n = piece.trim_end_matches('\n').chars().count();
-        let tok = tok_of(style.foreground);
+        let tok = Tok::from_u8(style.foreground.r);
         let tok = if tok == Tok::Plain && style.font_style.contains(FontStyle::ITALIC) { Tok::Emphasis } else { tok };
         if n > 0 && tok != Tok::Plain {
             match out.last_mut() {
@@ -662,15 +551,6 @@ mod tests {
             std::thread::sleep(std::time::Duration::from_millis(1));
         }
         assert!(toks(&mut h, &rope2, 1990).iter().all(|(_, k)| *k == Tok::Comment));
-    }
-
-    #[test]
-    fn colors_come_from_the_palette() {
-        let p = M3Palette::from_seed("#6750A4", true);
-        assert_eq!(Tok::Keyword.color(&p), p.primary);
-        assert_eq!(Tok::Comment.color(&p), p.outline);
-        let light = M3Palette::from_seed("#6750A4", false);
-        assert_ne!(Tok::Keyword.color(&light), Tok::Keyword.color(&p));
     }
 
     #[test]

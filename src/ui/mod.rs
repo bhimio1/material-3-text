@@ -12,6 +12,7 @@ use crate::document::External;
 use crate::editor::{self, Decorations, EditorOptions};
 use crate::syntax;
 use crate::ui_ext;
+use material_3_ui::markdown;
 use egui::{pos2, vec2, CornerRadius, Frame, Margin, Rect, Ui, UiBuilder};
 use material_3_ui::common;
 use material_3_ui::icons::icons::*;
@@ -165,7 +166,7 @@ fn editor_area(app: &mut App, ui: &mut Ui) {
                 ui.set_min_size(ui.available_size());
                 egui::ScrollArea::vertical().id_salt(("preview", doc.id)).auto_shrink([false, false]).show(ui, |ui| {
                     Frame::new().inner_margin(Margin::symmetric(24, 18)).show(ui, |ui| {
-                        crate::markdown::show(ui, &text, 14.5, &mut |url| links.push(url));
+                        markdown::show_with(ui, &text, 14.5, &mut |url| links.push(url), Some(&syntect_glue));
                     });
                 });
             });
@@ -220,7 +221,7 @@ pub(crate) fn recent_lists(app: &mut App, ui: &mut Ui, max: usize) {
             for path in list {
                 let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
                 let dir = path.parent().map(material_3_ui::sys::paths::tilde).unwrap_or_default();
-                let icon = ui_ext::file_icon(&name, folder, false);
+                let icon = widgets::file_icon(&name, folder, false);
                 let resp = common::list_row(ui, icon, false, &name, &dir, |_| {});
                 if resp.clicked() {
                     app.actions.push(if folder {
@@ -232,4 +233,9 @@ pub(crate) fn recent_lists(app: &mut App, ui: &mut Ui, max: usize) {
             }
         });
     }
+}
+
+/// Markdown code blocks highlighted like the editor.
+fn syntect_glue(code: &str, lang: &str) -> Vec<Vec<crate::syntax::Span>> {
+    crate::syntax::snippet(code, lang)
 }
